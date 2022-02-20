@@ -1,6 +1,6 @@
 const { Canvas, createCanvas, Image, ImageData, loadImage } = require('canvas');
 const { JSDOM } = require('jsdom');
-const { writeFileSync, existsSync, mkdirSync } = require("fs");
+const { writeFileSync,} = require("fs");
 // This is our program. This time we use JavaScript async / await and promises to handle asynchronicity.
 (async () => {
   // before loading opencv.js we emulate a minimal HTML DOM. See the function declaration below.
