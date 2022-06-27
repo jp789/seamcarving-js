@@ -16,38 +16,49 @@ const {loadOpenCV, installDOM} = require("./utils");
   const src = cv.imread(image);
   const dstx = new cv.Mat();
   const dsty = new cv.Mat();
-
+  console.log('image width: ' + src.cols + '\n' +
+  'image height: ' + src.rows + '\n' +
+  'image size: ' + src.size().width + '*' + src.size().height + '\n' +
+  'image depth: ' + src.depth() + '\n' +
+  'image channels ' + src.channels() + '\n' +
+  'image type: ' + src.type() + '\n');
   cv.cvtColor(src, src, cv.COLOR_RGB2GRAY, 0);
-
-  // TODO don't think blur is needed, or normalization for that matter
-
-  cv.Sobel(src, dstx, cv.CV_8U, 1, 0, 3, 1, 0, cv.BORDER_DEFAULT);
-  cv.Sobel(src, dsty, cv.CV_8U, 0, 1, 3, 1, 0, cv.BORDER_DEFAULT);
+  // console.log('image width: ' + src.cols + '\n' +
+  //           'image height: ' + src.rows + '\n' +
+  //           'image size: ' + src.size().width + '*' + src.size().height + '\n' +
+  //           'image depth: ' + src.depth() + '\n' +
+  //           'image channels ' + src.channels() + '\n' +
+  //           'image type: ' + src.type() + '\n');
+  exit()
+  // missing a normalization step at some point, because final output is overexposed
+  cv.Sobel(src, dstx, cv.CV_64F, 1, 0, 3, 1, 0, cv.BORDER_DEFAULT);
+  cv.Sobel(src, dsty, cv.CV_64F, 0, 1, 3, 1, 0, cv.BORDER_DEFAULT);
 
   let sobelx2 = new cv.Mat();
   let sobely2 = new cv.Mat();
   cv.multiply(dstx, dstx, sobelx2);
   cv.multiply(dsty, dsty, sobely2);
 
-  // TODO take magnitude or sqrt of sobelx2 + sobelxy 
-  // learn about matrix operations in opencv js here 
-  // https://docs.opencv.org/3.4/dd/d4d/tutorial_js_image_arithmetics.html
-
   
-  const canvasOutputx = createCanvas(300, 300);
-  const canvasOutputy = createCanvas(300, 300);
+  let sobel_sq_sum = new cv.Mat();
+  cv.add(sobelx2, sobely2, sobel_sq_sum);
 
-  cv.imshow(canvasOutputx, dstx);
-  cv.imshow(canvasOutputy, dsty);
+  let sobel_mag = new cv.Mat()
+  cv.sqrt(sobel_sq_sum, sobel_mag);
+
+  // const canvasOutputx = createCanvas(300, 300);
+  // const canvasOutputy = createCanvas(300, 300);
+  const canvasOutput = createCanvas(300, 300);
+
+  // cv.imshow(canvasOutputx, dstx);
+  // cv.imshow(canvasOutputy, dsty);
+  cv.imshow(canvasOutput, sobel_sq_sum);
 
   // move file utils below to separate file/function
   // https://stackoverflow.com/a/26815894/16952248
-  // writeFile('outputX.jpg', canvasOutputx.toBuffer('image/jpeg'), (err) => {
-  //   console.log("done writing outputx");
-  // });
-  
-  // writeFile('outputY.jpg', canvasOutputy.toBuffer('image/jpeg'), (err) => {
-  //   console.log("done writing outputy");
+ 
+  // writeFile('output.jpg', canvasOutput.toBuffer('image/jpeg'), (err) => {
+  //   console.log("done writing sobelmag");
   // });
 
   src.delete(); 
@@ -55,5 +66,8 @@ const {loadOpenCV, installDOM} = require("./utils");
   dsty.delete();
   sobelx2.delete();
   sobely2.delete();
+  sobel_sq_sum.delete();
+  sobel_mag.delete();
+  // mask.delete();
 })();
 
